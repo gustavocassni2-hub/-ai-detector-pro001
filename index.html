@@ -1,217 +1,50 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#080d18">
-  <title>AI Detector PRO</title>
-  <style>
-    :root{color-scheme:dark;--bg:#080d18;--panel:#111b2d;--line:#293750;--blue:#54a8ff;--muted:#a7b4ca}
-    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:#fff;font:16px Arial,sans-serif}
-    header{padding:22px max(20px,calc((100% - 900px)/2));border-bottom:1px solid #202b40}
-    .logo{font-size:22px;font-weight:800;color:var(--blue)}.logo span{color:white}
-    main{max-width:900px;margin:auto;padding:25px 18px 50px}
-    .hero{text-align:center;padding:24px 0 28px}.hero h1{font-size:clamp(28px,6vw,42px);margin:0 0 12px}.hero h1 span{color:var(--blue)}
-    .hero p,.muted{color:var(--muted);line-height:1.55}
-    .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px}
-    .tab{background:#111b2d;border:1px solid var(--line);color:white;border-radius:10px;padding:14px 6px;font-size:15px}
-    .tab.active{background:#1765b5;border-color:var(--blue)}
-    .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}
-    textarea{width:100%;min-height:210px;resize:vertical;background:#080d18;color:white;border:1px solid #34445e;border-radius:10px;padding:15px;font:15px Arial;line-height:1.5}
-    .upload{display:block;text-align:center;padding:34px 15px;border:2px dashed #3b587d;border-radius:12px;background:#0c1525;cursor:pointer}
-    .upload input{display:block;max-width:100%;margin:15px auto 0}
-    button{cursor:pointer}.analyze{width:100%;padding:16px;margin-top:18px;border:0;border-radius:10px;background:linear-gradient(90deg,#1765b5,#398fff);color:white;font-weight:bold;font-size:16px}
-    button:disabled{opacity:.55;cursor:wait}
-    .hidden{display:none!important}
-    .result{display:none;margin-top:22px;padding:20px;background:#0b1423;border:1px solid #34445e;border-radius:12px}
-    .result h2{color:var(--blue);margin-top:0}.score{font-size:34px;font-weight:bold;margin:12px 0}
-    .bar{height:10px;background:#26344b;border-radius:20px;overflow:hidden}.fill{height:100%;width:0;background:var(--blue);transition:width .5s}
-    .details{color:#c4cede;line-height:1.7;margin-top:14px;overflow-wrap:anywhere}
-    .notice{margin-top:16px;padding:13px;border-radius:9px;background:#292311;border:1px solid #65512a;color:#f5d78b;font-size:13px;line-height:1.5}
-    .error{margin-top:14px;color:#ffb4b4;white-space:pre-wrap}.preview{display:block;max-width:100%;max-height:260px;margin:15px auto 0;border-radius:10px}
-    .small{font-size:13px;color:var(--muted)}footer{text-align:center;color:#71819b;font-size:13px;padding:25px}
-    @media(max-width:520px){.panel{padding:16px}.tab{font-size:13px}.hero{padding-top:12px}}
-  </style>
-</head>
-<body>
-<header><div class="logo">AI <span>DETECTOR PRO</span></div></header>
-<main>
-  <section class="hero">
-    <h1>Descubra possíveis sinais de <span>IA</span></h1>
-    <p>Analise textos, imagens e vídeos com serviços especializados.</p>
-  </section>
-
-  <div class="tabs" role="tablist">
-    <button class="tab active" data-tab="text" type="button">📝 Texto</button>
-    <button class="tab" data-tab="image" type="button">🖼️ Imagem</button>
-    <button class="tab" data-tab="video" type="button">🎬 Vídeo</button>
-  </div>
-
-  <section class="panel">
-    <div id="textPanel">
-      <h3>Texto para análise</h3>
-      <textarea id="textInput" placeholder="Cole aqui o texto (mínimo recomendado: 250 caracteres)..."></textarea>
-      <p class="small">A detecção de texto usa GPTZero, quando a chave correspondente estiver configurada.</p>
-    </div>
-
-    <div id="imagePanel" class="hidden">
-      <h3>Enviar imagem</h3>
-      <label class="upload">Escolha uma imagem
-        <input id="imageInput" type="file" accept="image/jpeg,image/png,image/webp">
-        <p class="small">JPG, PNG ou WEBP. Máximo: 4 MB.</p>
-      </label>
-      <img id="imagePreview" class="preview hidden" alt="Prévia da imagem">
-    </div>
-
-    <div id="videoPanel" class="hidden">
-      <h3>Enviar vídeo</h3>
-      <label class="upload">Escolha um vídeo
-        <input id="videoInput" type="file" accept="video/mp4,video/webm,video/quicktime">
-        <p class="small">MP4, WEBM ou MOV. Máximo: 4 MB e menos de 60 segundos nesta versão.</p>
-      </label>
-      <video id="videoPreview" class="preview hidden" controls></video>
-    </div>
-
-    <button id="analyzeButton" class="analyze" type="button">ANALISAR AGORA 🔍</button>
-    <div id="error" class="error" role="alert"></div>
-
-    <section id="result" class="result" aria-live="polite">
-      <h2 id="resultTitle">Resultado</h2>
-      <div id="resultLabel"></div>
-      <div class="score" id="score"></div>
-      <div class="bar"><div id="fill" class="fill"></div></div>
-      <div id="details" class="details"></div>
-      <div class="notice">A pontuação é a estimativa fornecida pelo modelo, não uma certeza nem prova de autoria. Detectores podem errar, especialmente com textos curtos, conteúdo editado, comprimido ou fora dos dados de treinamento.</div>
-    </section>
-  </section>
-</main>
-<footer>AI DETECTOR PRO · Projeto experimental</footer>
-
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080f20"><title>AI Detector Pro</title>
+<style>
+:root{--bg:#080f20;--panel:#111d34;--text:#f4f7ff;--muted:#aab8d0;--accent:#70a5ff;--line:#263957}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#172b4b,#080f20 55%);color:var(--text);font-family:Arial,sans-serif;min-height:100vh;padding:18px}
+main{max-width:900px;margin:auto}header{text-align:center;padding:28px 10px 22px}.logo{font-size:13px;letter-spacing:3px;color:var(--accent);font-weight:bold}
+h1{font-size:clamp(30px,7vw,48px);margin:12px 0}header p,.desc{color:var(--muted);line-height:1.6}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:22px 0}
+.tab{border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:15px 8px;border-radius:13px;font-weight:bold;font-size:15px;cursor:pointer}
+.tab.active{background:#244779;border-color:var(--accent);color:white}
+.panel{display:none;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:clamp(20px,5vw,34px)}
+.panel.active{display:block}.icon{font-size:34px}h2{margin:10px 0;font-size:25px}
+.steps{padding-left:22px;color:#dce6f8;line-height:1.9}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+a.btn{display:inline-block;text-decoration:none;text-align:center;background:var(--accent);color:#081326;font-weight:bold;padding:14px 20px;border-radius:12px;flex:1;min-width:190px}
+a.secondary{background:#172641;color:var(--text);border:1px solid var(--line)}
+.notice{margin-top:18px;padding:14px;border-radius:12px;background:#0b1629;border:1px solid var(--line);color:var(--muted);font-size:13px;line-height:1.6}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 5px}
+@media(max-width:480px){body{padding:14px}.tab{font-size:13px;padding:13px 4px}.actions{flex-direction:column}a.btn{width:100%}}
+</style></head>
+<body><main>
+<header><div class="logo">TECNOLOGIA • VERIFICAÇÃO DIGITAL</div><h1>AI Detector <span style="color:#70a5ff">Pro</span></h1>
+<p>Uma central para consultar ferramentas que analisam possíveis sinais de conteúdo criado ou manipulado por inteligência artificial.</p></header>
+<nav class="tabs" aria-label="Tipos de análise">
+<button class="tab active" data-tab="texto" type="button">📝 Texto</button>
+<button class="tab" data-tab="imagem" type="button">🖼️ Imagem</button>
+<button class="tab" data-tab="video" type="button">🎬 Vídeo</button></nav>
+<section class="panel active" id="texto"><div class="icon">📝</div><h2>Análise de texto</h2>
+<p class="desc">Use uma ferramenta externa para verificar se um texto apresenta características associadas a conteúdo gerado por IA.</p>
+<ol class="steps"><li>Toque em “Abrir detector”.</li><li>Copie e cole o texto na ferramenta.</li><li>Leia o resultado considerando as limitações.</li></ol>
+<div class="actions"><a class="btn" href="https://www.pangram.com/pt" target="_blank" rel="noopener noreferrer">Abrir detector de texto</a></div>
+<div class="notice">A ferramenta pode oferecer verificações gratuitas limitadas e pedir cadastro. Detectores podem errar, especialmente com textos curtos ou editados.</div></section>
+<section class="panel" id="imagem"><div class="icon">🖼️</div><h2>Análise de imagem</h2>
+<p class="desc">Consulte uma ferramenta externa para procurar indícios de geração por IA e informações de origem da imagem.</p>
+<ol class="steps"><li>Toque em “Abrir detector”.</li><li>Escolha a imagem no seu aparelho.</li><li>Confira o resultado e as evidências.</li></ol>
+<div class="actions"><a class="btn" href="https://imageid.store/pt" target="_blank" rel="noopener noreferrer">Abrir detector de imagem</a><a class="btn secondary" href="https://wedetect.ai/pt/" target="_blank" rel="noopener noreferrer">Outra opção</a></div>
+<div class="notice">Metadados podem ser removidos ou alterados. A ausência deles não prova que a imagem foi feita por IA. Evite enviar imagens privadas sem autorização.</div></section>
+<section class="panel" id="video"><div class="icon">🎬</div><h2>Análise de vídeo</h2>
+<p class="desc">Use um serviço externo para procurar sinais de vídeo sintético ou manipulado.</p>
+<ol class="steps"><li>Toque em “Abrir detector”.</li><li>Envie o vídeo conforme os formatos e limites do serviço.</li><li>Leia o resultado como estimativa, não confirmação.</li></ol>
+<div class="actions"><a class="btn" href="https://deepfakecheck.io/" target="_blank" rel="noopener noreferrer">Abrir detector de vídeo</a><a class="btn secondary" href="https://deepfakedetector.ai/pt-br" target="_blank" rel="noopener noreferrer">Outra opção</a></div>
+<div class="notice">Alguns serviços exigem conta ou limitam quantidade, tamanho e duração dos vídeos gratuitos. Um detector pode não reconhecer todos os tipos de edição ou geração por IA.</div></section>
+<div class="notice"><strong>Importante:</strong> este site funciona como uma central de acesso. As análises são realizadas pelos serviços externos, não diretamente pelo AI Detector Pro. Nenhum resultado isolado prova que um conteúdo é verdadeiro, falso ou criado por IA.</div>
+<footer>AI Detector Pro • Projeto educativo</footer></main>
 <script>
-const $ = id => document.getElementById(id);
-let activeTab = "text";
-
-document.querySelectorAll(".tab").forEach(button => {
-  button.addEventListener("click", () => {
-    activeTab = button.dataset.tab;
-    document.querySelectorAll(".tab").forEach(b => b.classList.toggle("active", b === button));
-    $("textPanel").classList.toggle("hidden", activeTab !== "text");
-    $("imagePanel").classList.toggle("hidden", activeTab !== "image");
-    $("videoPanel").classList.toggle("hidden", activeTab !== "video");
-    $("result").style.display = "none";
-    $("error").textContent = "";
-  });
-});
-
-$("imageInput").addEventListener("change", () => {
-  const file = $("imageInput").files[0];
-  if (!file) return;
-  $("imagePreview").src = URL.createObjectURL(file);
-  $("imagePreview").classList.remove("hidden");
-});
-
-$("videoInput").addEventListener("change", () => {
-  const file = $("videoInput").files[0];
-  if (!file) return;
-  $("videoPreview").src = URL.createObjectURL(file);
-  $("videoPreview").classList.remove("hidden");
-});
-
-function showResult(title, label, percent, details) {
-  $("resultTitle").textContent = title;
-  $("resultLabel").textContent = label;
-  $("score").textContent = percent === null ? "Sem pontuação" : `${percent.toFixed(1)}%`;
-  $("fill").style.width = percent === null ? "0%" : `${Math.max(0,Math.min(100,percent))}%`;
-  $("details").replaceChildren();
-  details.forEach(line => {
-    const p = document.createElement("p");
-    p.textContent = line;
-    $("details").appendChild(p);
-  });
-  $("result").style.display = "block";
-}
-
-async function sendAnalysis(form) {
-  const response = await fetch("/.netlify/functions/analyze", { method: "POST", body: form });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error || `Erro HTTP ${response.status}`);
-  return data;
-}
-
-$("analyzeButton").addEventListener("click", async () => {
-  const button = $("analyzeButton");
-  $("error").textContent = "";
-  $("result").style.display = "none";
-  button.disabled = true;
-  button.textContent = "ANALISANDO...";
-
-  try {
-    const form = new FormData();
-    form.append("type", activeTab);
-
-    if (activeTab === "text") {
-      const text = $("textInput").value.trim();
-      if (text.length < 100) throw new Error("Digite pelo menos 100 caracteres.");
-      if (text.length > 12000) throw new Error("Nesta versão, o limite é 12.000 caracteres.");
-      form.append("text", text);
-    } else if (activeTab === "image") {
-      const file = $("imageInput").files[0];
-      if (!file) throw new Error("Selecione uma imagem.");
-      if (file.size > 4 * 1024 * 1024) throw new Error("A imagem deve ter no máximo 4 MB.");
-      form.append("file", file);
-    } else {
-      const file = $("videoInput").files[0];
-      if (!file) throw new Error("Selecione um vídeo.");
-      if (file.size > 4 * 1024 * 1024) throw new Error("O vídeo deve ter no máximo 4 MB.");
-      const video = $("videoPreview");
-      if (!video.duration || !Number.isFinite(video.duration)) throw new Error("Não foi possível ler a duração do vídeo.");
-      if (video.duration >= 60) throw new Error("Nesta versão, o vídeo precisa ter menos de 60 segundos.");
-      form.append("file", file);
-    }
-
-    const data = await sendAnalysis(form);
-    if (activeTab === "text") {
-      const probs = data.class_probabilities || {};
-      const ai = Number(probs.ai);
-      const mixed = Number(probs.mixed);
-      const human = Number(probs.human);
-      const percent = Number.isFinite(ai) ? ai * 100 : null;
-      const label = data.predicted_class === "ai" ? "Modelo classificou como provável IA"
-        : data.predicted_class === "human" ? "Modelo classificou como provável humano"
-        : data.predicted_class === "mixed" ? "Modelo encontrou sinais mistos" : "Resultado do modelo";
-      showResult("Análise de texto", label, percent, [
-        `Classificação: ${data.predicted_class || "não informada"}`,
-        `Probabilidade humano: ${Number.isFinite(human) ? (human*100).toFixed(1)+"%" : "indisponível"}`,
-        `Probabilidade IA indicada pelo modelo: ${Number.isFinite(ai) ? (ai*100).toFixed(1)+"%" : "indisponível"}`,
-        `Probabilidade mista: ${Number.isFinite(mixed) ? (mixed*100).toFixed(1)+"%" : "indisponível"}`,
-        `Confiança informada pelo serviço: ${data.confidence_category || "não informada"}`,
-        data.result_message || "Interprete o resultado com cautela."
-      ]);
-    } else if (activeTab === "image") {
-      const p = Number(data.ai_probability);
-      showResult("Análise de imagem", p >= 50 ? "Sinais compatíveis com imagem gerada/editada por IA" : "Poucos sinais detectados pelo modelo", p, [
-        `Modelo: Sightengine · genai`,
-        `Pontuação retornada pelo serviço: ${p.toFixed(1)}%`,
-        `Arquivo: ${data.filename || "imagem enviada"}`,
-        "A pontuação é uma estimativa do modelo, não confirmação de autoria."
-      ]);
-    } else {
-      const p = Number(data.ai_probability);
-      showResult("Análise de vídeo", p >= 50 ? "Sinais compatíveis com vídeo gerado por IA" : "Poucos sinais detectados pelo modelo", p, [
-        `Modelo: Sightengine · genai`,
-        `Média das pontuações dos quadros: ${p.toFixed(1)}%`,
-        `Quadros analisados: ${data.frames_analyzed}`,
-        `Arquivo: ${data.filename || "vídeo enviado"}`,
-        "A média pode esconder trechos específicos; não é uma prova definitiva."
-      ]);
-    }
-  } catch (error) {
-    $("error").textContent = error.message || "Não foi possível concluir a análise.";
-  } finally {
-    button.disabled = false;
-    button.textContent = "ANALISAR AGORA 🔍";
-  }
-});
-</script>
-</body>
-</html>
+const tabs=document.querySelectorAll('.tab'),panels=document.querySelectorAll('.panel');
+tabs.forEach(tab=>tab.addEventListener('click',()=>{tabs.forEach(item=>item.classList.toggle('active',item===tab));panels.forEach(panel=>panel.classList.toggle('active',panel.id===tab.dataset.tab));}));
+</script></body></html>
