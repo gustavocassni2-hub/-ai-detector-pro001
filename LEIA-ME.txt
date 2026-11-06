@@ -1,0 +1,45 @@
+# AI Detector PRO
+
+Projeto web com frontend HTML e backend por Netlify Functions.
+
+## Recursos
+- Texto: GPTZero API (`POST https://api.gptzero.me/v2/predict/text`)
+- Imagem: Sightengine (`models=genai`)
+- Vídeo curto: Sightengine (`/1.0/video/check-sync.json`)
+
+## Antes de publicar
+1. Crie uma conta e obtenha uma chave de API do GPTZero, se quiser ativar a análise de texto.
+2. Crie uma conta Sightengine e obtenha `api_user` e `api_secret` para imagens e vídeos.
+3. Não coloque nenhuma chave dentro do `index.html` nem compartilhe as chaves em mensagens.
+
+## Estrutura
+```
+ai-detector-pro/
+├── index.html
+├── netlify.toml
+└── netlify/
+    └── functions/
+        └── analyze.mjs
+```
+
+## Variáveis de ambiente no Netlify
+Em Site configuration / Environment variables, adicione:
+- `GPTZERO_API_KEY`
+- `SIGHTENGINE_API_USER`
+- `SIGHTENGINE_API_SECRET`
+
+Depois de salvar as variáveis, faça um novo deploy.
+
+## Limites desta primeira versão
+- Texto: 100 a 12.000 caracteres.
+- Imagem: JPG, PNG ou WEBP até 4 MB.
+- Vídeo: MP4, WEBM ou MOV até 4 MB e menos de 60 segundos.
+- A função síncrona de vídeo é indicada pelo provedor para vídeos curtos com menos de um minuto.
+- O limite de payload das funções Netlify é restrito; por isso os arquivos foram limitados para este protótipo.
+- Os planos, cotas, preços e limites das APIs podem mudar. Confira os painéis dos provedores.
+
+## Teste
+Abra o site publicado e teste um conteúdo por vez. Se aparecer erro de configuração, confira se os nomes das variáveis estão exatamente iguais aos indicados acima.
+
+## Aviso
+Nenhum detector é 100% preciso. As pontuações são estimativas do modelo e não devem ser usadas isoladamente como prova de autoria.
